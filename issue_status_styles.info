@@ -1,0 +1,5 @@
+name = Issue Status Styles
+description = Apply classes to Project Issue statuses.
+core = 7.x
+version = 7.x-dev
+package = Project

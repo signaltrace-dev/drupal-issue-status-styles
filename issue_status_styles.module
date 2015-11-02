@@ -1,0 +1,105 @@
+<?php
+
+function issue_status_styles_menu(){
+  $items = array();
+  $items['admin/config/project/project-issue-status-styles'] = array(
+    'title' => 'Status Styles',
+    'description' => 'Add CSS classes to status codes.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('issue_status_styles_config'),
+    'access arguments' => array('administer projects'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/config/project/project-issue-priority-styles'] = array(
+    'title' => 'Priority Styles',
+    'description' => 'Add CSS classes to priority codes.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('issue_status_styles_priority_config'),
+    'access arguments' => array('administer projects'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function issue_status_styles_config(){
+  $form = array(
+    '#attributes' => array(
+      'class' => array(
+        'form-horizontal',
+      ),
+    ),
+  );
+
+  $form['description'] = array(
+    '#markup' => t('Use the form below to add CSS classes to the various status codes used throughout the system. These can be used to apply styles such as highlighting important items.'),
+    '#prefix' => '<div class="alert alert-info"><i class="icon glyphicon glyphicon-question-sign" aria-hidden="true"></i>&nbsp;&nbsp;',
+    '#suffix' => '</div>',
+  );
+
+  $field = field_info_field('field_issue_status');
+  $status_codes = list_allowed_values($field);
+  foreach($status_codes as $key => $status){
+    $status_id = 'issue_status_styles_' . $key;
+    $status_classes = variable_get($status_id);
+    $form[$status_id] = array(
+      '#type' => 'textfield',
+      '#title' => $status,
+      '#field_prefix' => '<div class="col-sm-4">',
+      '#field_suffix' => '</div>',
+      '#default_value' => $status_classes,
+    );
+  }
+  $form['#validate'][] = 'issue_status_styles_config_validate';
+
+  return system_settings_form($form);
+}
+
+function issue_status_styles_priority_config(){
+  $form = array(
+    '#attributes' => array(
+      'class' => array(
+        'form-horizontal',
+      ),
+    ),
+  );
+
+  $form['description'] = array(
+    '#markup' => t('Use the form below to add CSS classes to the various priority codes used throughout the system. These can be used to apply styles such as highlighting important items.'),
+    '#prefix' => '<div class="alert alert-info"><i class="icon glyphicon glyphicon-question-sign" aria-hidden="true"></i>&nbsp;&nbsp;',
+    '#suffix' => '</div>',
+  );
+
+  $field = field_info_field('field_issue_priority');
+  $status_codes = list_allowed_values($field);
+  foreach($status_codes as $key => $status){
+    $status_id = 'issue_priority_styles_' . $key;
+    $status_classes = variable_get($status_id);
+    $form[$status_id] = array(
+      '#type' => 'textfield',
+      '#title' => $status,
+      '#field_prefix' => '<div class="col-sm-4">',
+      '#field_suffix' => '</div>',
+      '#default_value' => $status_classes,
+    );
+  }
+  $form['#validate'][] = 'issue_status_styles_config_validate';
+
+  return system_settings_form($form);
+}
+
+
+
+function issue_status_styles_config_validate($form, &$form_state){
+  foreach($form_state['values'] as $key => $value){
+    if(strpos($key, 'issue_status_styles_') === 0 || strpos($key, 'issue_priority_styles_') === 0){
+      if(!empty($value)){
+        if (preg_match("/[_a-zA-Z]+[_a-zA-Z0-9-]*/", $value) == 0){
+          form_set_error($key, t('Not a valid value for %title.', array('%title' => $form[$key]['#title'])));
+        }
+      }
+    }
+  }
+
+}
